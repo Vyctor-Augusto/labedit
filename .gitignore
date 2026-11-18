@@ -1,0 +1,11 @@
+/.local/
+/renders/
+__pycache__/
+*.py[cod]
+*.fcpxml
+*.srt
+*.mp4
+*.mov
+*.mkv
+*.wav
+CripituLab-calibracoes.json
