@@ -4,5 +4,5 @@ if not exist "%~dp0.local\venv\Scripts\python.exe" (
     pause
     exit /b 1
 )
-"%~dp0.local\venv\Scripts\python.exe" "%~dp0CripituLab.py" %*
+"%~dp0.local\venv\Scripts\python.exe" "%~dp0LabEdit.py" %*
 if errorlevel 1 pause

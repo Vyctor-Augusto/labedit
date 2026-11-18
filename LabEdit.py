@@ -24,7 +24,7 @@ from urllib.parse import unquote, urlsplit
 
 PROJECT_DIR = Path(__file__).resolve().parent
 RESOLVE_SNAPSHOTS = PROJECT_DIR / ".local" / "resolve-timeline"
-CALIBRATIONS = PROJECT_DIR / ".local" / "CripituLab-calibracoes.json"
+CALIBRATIONS = PROJECT_DIR / ".local" / "LabEdit-calibracoes.json"
 FACE_MODEL = PROJECT_DIR / "models" / "yunet-dynamic.onnx"
 
 
@@ -467,7 +467,7 @@ def fcpxml(camera, reference, segments, offset, fps, title, obs_composite=False,
         ET.SubElement(asset, "media-rep", kind="original-media", src=media.path.as_uri())
 
     library = ET.SubElement(root, "library")
-    event = ET.SubElement(library, "event", name="CripituLab")
+    event = ET.SubElement(library, "event", name="LabEdit")
     project = ET.SubElement(event, "project", name=title)
     total = sum(b - a for a, b, _, _ in segments)
     sequence = ET.SubElement(project, "sequence", format="r1", duration=time(total),
@@ -639,7 +639,7 @@ def write_cut(args, review=False):
     faces = track_face(camera) if getattr(args, "track_face", True) else None
     total = sum(b - a for a, b, _, _ in segments)
     close_count = sum(not split for _, _, _, split in segments)
-    report = [f"CripituLab — {out.stem}", f"Câmera: {camera.path}",
+    report = [f"LabEdit — {out.stem}", f"Câmera: {camera.path}",
               f"Referência: {reference.path if reference else 'sem referência'}",
               f"Faixa da referência: {args.ref_track} | Tela dividida do OBS: {args.obs_composite}",
               f"Sincronismo: {args.offset:+.3f}s ({sync_note}) | FPS: {fps} | mic analisado: {args.mic_track}",
@@ -767,7 +767,7 @@ def original_pair(sources):
         if not report.is_file():
             continue
         lines = report.read_text(encoding="utf-8").splitlines()
-        if not lines or not lines[0].startswith("CripituLab — "):
+        if not lines or not lines[0].startswith(("LabEdit — ", "CripituLab — ")):
             continue
         camera = next((line.partition(": ")[2] for line in lines if line.startswith("Câmera: ")), "")
         source = next((line.partition(": ")[2] for line in lines if line.startswith("Referência: ")), "")
@@ -792,7 +792,7 @@ def resolve_command(mailbox, action, path=""):
                     return message
                 raise ValueError(message)
         if Path(f"{mailbox}.closed").exists():
-            raise ValueError("A conexão encerrou. Abra o CripituLab novamente pelo menu do Resolve.")
+            raise ValueError("A conexão encerrou. Abra o LabEdit novamente pelo menu do Resolve.")
         time.sleep(.15)
     raise ValueError("O Resolve não confirmou o envio. Confira o Media Pool antes de tentar de novo.")
 
@@ -802,7 +802,7 @@ def gui(snapshot=None):
     from tkinter import filedialog, messagebox, ttk
 
     root = tk.Tk()
-    root.title("CripituLab • Primeiro corte")
+    root.title("LabEdit • Primeiro corte")
     root.configure(background="#14202a")
     panel = ttk.Frame(root, padding=18)
     panel.pack(side="left", fill="both", expand=True)
@@ -928,7 +928,7 @@ def gui(snapshot=None):
         if not draft or sent:
             return
         if not connected():
-            status.set("Abra pelo menu Workspace → Scripts → CripituLab para enviar ao Resolve.")
+            status.set("Abra pelo menu Workspace → Scripts → LabEdit para enviar ao Resolve.")
             return
         out, camera, reference, segments, offset, fps, args, faces = draft
         revised = []
@@ -990,13 +990,13 @@ def gui(snapshot=None):
                             if re.fullmatch(r"timeline-\d+-\d+\.xml", p.name)),
                            key=lambda item: item.stat().st_mtime, default=None)
             if path is None:
-                raise ValueError("No Resolve, use Workspace → Scripts → CripituLab primeiro.")
+                raise ValueError("No Resolve, use Workspace → Scripts → LabEdit primeiro.")
             title, sources = resolve_sources(path)
             candidate = Path(f"{path}.bridge")
             if Path(f"{candidate}.ready").exists() and not Path(f"{candidate}.closed").exists():
                 mailbox = candidate
         except (OSError, ValueError, ET.ParseError) as error:
-            messagebox.showerror("CripituLab", str(error))
+            messagebox.showerror("LabEdit", str(error))
             return
         files = list(sources)
         recovered = original_pair(sources)
@@ -1030,7 +1030,7 @@ def gui(snapshot=None):
         def confirm_sources():
             cam, ref = [selection.current() for selection in selections]
             if cam < 0 or ref < 0 or cam == ref:
-                messagebox.showerror("CripituLab", "Escolha clipes diferentes para cada função.", parent=dialog)
+                messagebox.showerror("LabEdit", "Escolha clipes diferentes para cada função.", parent=dialog)
                 return
             apply_sources(files[cam], files[ref] if ref < len(files) else None, title)
             dialog.destroy()
@@ -1041,7 +1041,7 @@ def gui(snapshot=None):
         values["camera"].set(str(camera))
         values["reference"].set(str(reference) if reference else "")
         if not values["output"].get():
-            label = f"{camera.stem} - CripituLab"
+            label = f"{camera.stem} - LabEdit"
             prefix = re.sub(r'[<>:"/\\|?*]', "_", label).strip()
             folder = PROJECT_DIR / "renders"
             destination = folder / f"{prefix}.fcpxml"
@@ -1055,7 +1055,7 @@ def gui(snapshot=None):
     def start():
         data = {key: variable.get().strip() for key, variable in values.items()}
         if not data["camera"] or not data["output"]:
-            messagebox.showerror("CripituLab", "Escolha a câmera e o destino da timeline.")
+            messagebox.showerror("LabEdit", "Escolha a câmera e o destino da timeline.")
             return
         try:
             for key in ("offset", "mic_db", "ref_db", "pause", "close", "ref_gain", "voice_delay_ms"):
@@ -1066,7 +1066,7 @@ def gui(snapshot=None):
             data["close"] = data["close"] if data["close"] is not None else 2.5
             data["ref_track"] = int(data["ref_track"]) if data["ref_track"] else None
         except ValueError:
-            messagebox.showerror("CripituLab", "Confira os campos numéricos.")
+            messagebox.showerror("LabEdit", "Confira os campos numéricos.")
             return
         args = argparse.Namespace(**data, mic_track=0, margin=.09, keep_pauses=keep.get(),
                                   obs_composite=composite.get(), optimize_media=optimized.get())
@@ -1102,7 +1102,7 @@ def gui(snapshot=None):
                 completed(job.result())
             except (ValueError, OSError, KeyError, ZeroDivisionError) as error:
                 status.set(str(error))
-                messagebox.showerror("CripituLab", str(error))
+                messagebox.showerror("LabEdit", str(error))
 
         check()
 
@@ -1129,4 +1129,4 @@ if __name__ == "__main__":
         try:
             print(write_cut(parser().parse_args()))
         except (ValueError, OSError, KeyError, ZeroDivisionError) as error:
-            raise SystemExit(f"CripituLab: {error}") from error
+            raise SystemExit(f"LabEdit: {error}") from error

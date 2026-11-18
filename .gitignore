@@ -8,4 +8,5 @@ __pycache__/
 *.mov
 *.mkv
 *.wav
+LabEdit-calibracoes.json
 CripituLab-calibracoes.json

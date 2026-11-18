@@ -1,4 +1,4 @@
-"""Instala o ambiente local e adiciona o CripituLab ao menu do Resolve."""
+"""Instala o ambiente local e adiciona o LabEdit ao menu do Resolve."""
 
 import os
 from pathlib import Path
@@ -23,10 +23,10 @@ def build_launcher(root, python_gui):
     paths = {
         "snapshot_folder": root / ".local" / "resolve-timeline",
         "python_gui": python_gui,
-        "editor_script": root / "CripituLab.py",
+        "editor_script": root / "LabEdit.py",
     }
     prefix = "".join(f"local {key} = {lua_literal(path)}\n" for key, path in paths.items())
-    return prefix + (root / "CripituLab Resolve.lua").read_text(encoding="utf-8")
+    return prefix + (root / "LabEdit Resolve.lua").read_text(encoding="utf-8")
 
 
 def install():
@@ -42,11 +42,11 @@ def install():
     (LOCAL / "resolve-timeline").mkdir(parents=True, exist_ok=True)
     scripts = Path(os.environ["APPDATA"]) / UTILITY
     scripts.mkdir(parents=True, exist_ok=True)
-    destination = scripts / "CripituLab.lua"
-    temporary = scripts / "CripituLab.lua.installing"
+    destination = scripts / "LabEdit.lua"
+    temporary = scripts / "LabEdit.lua.installing"
     temporary.write_text(build_launcher(ROOT, python_gui), encoding="utf-8")
     temporary.replace(destination)
-    print("CripituLab instalado. Abra Workspace > Scripts > CripituLab.")
+    print("LabEdit instalado. Abra Workspace > Scripts > LabEdit.")
     print("Se a entrada não aparecer, reabra o Resolve.")
 
 

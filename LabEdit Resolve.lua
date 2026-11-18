@@ -4,7 +4,7 @@ local manager = app and app:GetProjectManager()
 local project = manager and manager:GetCurrentProject()
 local timeline = project and project:GetCurrentTimeline()
 if not timeline then
-    error("CripituLab: abra a timeline que contém os dois brutos.")
+    error("LabEdit: abra a timeline que contém os dois brutos.")
 end
 
 local snapshot
@@ -16,9 +16,9 @@ for i = 1, 1000 do
     end
 end
 if not snapshot or not timeline:Export(snapshot, app.EXPORT_FCP_7_XML, app.EXPORT_NONE) then
-    error("CripituLab: o Resolve não conseguiu exportar a lista de clipes da timeline.")
+    error("LabEdit: o Resolve não conseguiu exportar a lista de clipes da timeline.")
 end
-print("CripituLab: clipes da timeline " .. timeline:GetName() .. " enviados.")
+print("LabEdit: clipes da timeline " .. timeline:GetName() .. " enviados.")
 local mailbox = snapshot .. ".bridge"
 local function write(path, value)
     local file = io.open(path, "wb")
@@ -33,7 +33,7 @@ if os.execute then
         .. '" --resolve-timeline "' .. snapshot .. '"'
     local ok, result = pcall(os.execute, command)
     if not ok or (result ~= true and result ~= 0) then
-        print("CripituLab: abra a janela pelo atalho do Windows e clique em Ler timeline do Resolve.")
+        print("LabEdit: abra a janela pelo atalho do Windows e clique em Ler timeline do Resolve.")
     end
 end
 if not connected then return end
@@ -42,7 +42,7 @@ local project_id = project:GetUniqueId()
 local function respond(action, path, ticket)
     local current = manager:GetCurrentProject()
     if not current or current:GetUniqueId() ~= project_id then
-        return "error\nO projeto aberto mudou. Abra o CripituLab pelo menu do projeto de destino."
+        return "error\nO projeto aberto mudou. Abra o LabEdit pelo menu do projeto de destino."
     end
     if action == "read" then
         local active = current:GetCurrentTimeline()
